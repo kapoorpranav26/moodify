@@ -53,8 +53,8 @@ export async function getAuthUrl(): Promise<string> {
   const { verifier, challenge } = await generatePKCE();
   const state = generateRandomString(16);
 
-  sessionStorage.setItem('pkce_verifier', verifier);
-  sessionStorage.setItem('auth_state', state);
+  localStorage.setItem('pkce_verifier', verifier);
+  localStorage.setItem('auth_state', state);
 
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -71,7 +71,7 @@ export async function getAuthUrl(): Promise<string> {
 
 // Exchange code for tokens
 export async function exchangeCode(code: string): Promise<TokenResponse> {
-  const verifier = sessionStorage.getItem('pkce_verifier');
+  const verifier = localStorage.getItem('pkce_verifier');
   if (!verifier) throw new Error('No PKCE verifier found');
 
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -142,8 +142,8 @@ export function clearTokens() {
   localStorage.removeItem('spotify_access_token');
   localStorage.removeItem('spotify_refresh_token');
   localStorage.removeItem('spotify_expires_at');
-  sessionStorage.removeItem('pkce_verifier');
-  sessionStorage.removeItem('auth_state');
+  localStorage.removeItem('pkce_verifier');
+  localStorage.removeItem('auth_state');
 }
 
 export interface TokenResponse {
