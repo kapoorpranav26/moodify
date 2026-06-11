@@ -52,8 +52,12 @@ export default function DashboardPage() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) { router.replace('/'); return; }
-    fetchUser();
-    fetchPlaylists();
+    // Small delay to ensure localStorage is fully available after OAuth redirect
+    const timer = setTimeout(() => {
+      fetchUser();
+      fetchPlaylists();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // ─── Filter ───────────────────────────────────────────────────────────────
@@ -74,8 +78,18 @@ export default function DashboardPage() {
 
   // ─── API ──────────────────────────────────────────────────────────────────
   async function fetchUser() {
-    try { setUser(await getCurrentUser()); }
-    catch { logout(); }
+    try {
+      const u = await getCurrentUser();
+      setUser(u);
+    } catch (e) {
+      // Don't auto-logout on first failure — retry once
+      try {
+        const u = await getCurrentUser();
+        setUser(u);
+      } catch {
+        showToast('Could not load your profile. Please refresh.', 'error');
+      }
+    }
   }
 
   async function fetchPlaylists() {
