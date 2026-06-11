@@ -110,17 +110,29 @@ export default function DashboardPage() {
       const tracks = items.map((i) => i.track).filter(Boolean);
       if (!tracks.length) { setLoadingTracks(false); return; }
 
-      const [featuresArr, artistsArr]: [AudioFeatures[], SpotifyArtist[]] = await Promise.all([
-        getAudioFeatures(tracks.map((t) => t.id)),
-        getArtists([...new Set(tracks.flatMap((t) => t.artists.map((a) => a.id)))]),
-      ]);
+      // Fetch audio features and artists independently — neither is required
+      let featuresMap = new Map<string, AudioFeatures>();
+      let artistsMap = new Map<string, SpotifyArtist>();
 
-      setEnrichedTracks(enrichTracks(
-        tracks,
-        new Map(featuresArr.map((f) => [f.id, f])),
-        new Map(artistsArr.map((a) => [a.id, a]))
-      ));
-    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed', 'error'); }
+      try {
+        const featuresArr = await getAudioFeatures(tracks.map((t) => t.id));
+        featuresMap = new Map(featuresArr.map((f) => [f.id, f]));
+      } catch {
+        console.warn('Audio features unavailable');
+      }
+
+      try {
+        const artistIds = [...new Set(tracks.flatMap((t) => t.artists.map((a) => a.id)).filter(Boolean))];
+        if (artistIds.length > 0) {
+          const artistsArr = await getArtists(artistIds);
+          artistsMap = new Map(artistsArr.map((a) => [a.id, a]));
+        }
+      } catch {
+        console.warn('Artist data unavailable');
+      }
+
+      setEnrichedTracks(enrichTracks(tracks, featuresMap, artistsMap));
+    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed to load tracks', 'error'); }
     finally { setLoadingTracks(false); }
   }, []);
 

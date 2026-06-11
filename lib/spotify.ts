@@ -70,10 +70,17 @@ export async function getAudioFeatures(trackIds: string[]): Promise<AudioFeature
   const chunks = chunkArray(trackIds, 100);
 
   for (const chunk of chunks) {
-    const data = await spotifyFetch<{ audio_features: AudioFeatures[] }>(
-      `/audio-features?ids=${chunk.join(',')}`
-    );
-    results.push(...data.audio_features.filter(Boolean));
+    try {
+      const data = await spotifyFetch<{ audio_features: AudioFeatures[] }>(
+        `/audio-features?ids=${chunk.join(',')}`
+      );
+      if (data?.audio_features) {
+        results.push(...data.audio_features.filter(Boolean));
+      }
+    } catch {
+      // Audio features endpoint may be restricted — continue without them
+      console.warn('Audio features unavailable — genre detection will use artist data only');
+    }
   }
 
   return results;
@@ -82,13 +89,22 @@ export async function getAudioFeatures(trackIds: string[]): Promise<AudioFeature
 // ─── Artists ───────────────────────────────────────────────────────────────
 export async function getArtists(artistIds: string[]): Promise<SpotifyArtist[]> {
   const results: SpotifyArtist[] = [];
-  const chunks = chunkArray([...new Set(artistIds)], 50);
+  const unique = [...new Set(artistIds)].filter(Boolean);
+  if (unique.length === 0) return results;
+  const chunks = chunkArray(unique, 50);
 
   for (const chunk of chunks) {
-    const data = await spotifyFetch<{ artists: SpotifyArtist[] }>(
-      `/artists?ids=${chunk.join(',')}`
-    );
-    results.push(...data.artists.filter(Boolean));
+    try {
+      const data = await spotifyFetch<{ artists: SpotifyArtist[] }>(
+        `/artists?ids=${chunk.join(',')}`
+      );
+      if (data?.artists) {
+        results.push(...data.artists.filter(Boolean));
+      }
+    } catch {
+      // Artists endpoint may fail — continue without genre data
+      console.warn('Artists endpoint unavailable — some genre data may be missing');
+    }
   }
 
   return results;
