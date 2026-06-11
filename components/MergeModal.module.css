@@ -1,0 +1,69 @@
+.playlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 4px;
+}
+.plItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.plItem:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+.plItemSelected { border-color: var(--green) !important; background: rgba(29,185,84,0.08) !important; }
+
+.plThumb {
+  width: 64px; height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  position: relative;
+  flex-shrink: 0;
+}
+.plThumb img { width: 100%; height: 100%; object-fit: cover; }
+.checkOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(29,185,84,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+  font-weight: 700;
+}
+.plName {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.plCount { font-size: 10px; color: var(--text-muted); }
+.nameSection { margin-top: 4px; }
+.progressMsg {
+  font-size: 13px;
+  color: var(--green);
+  text-align: center;
+  padding: 8px;
+  background: rgba(29,185,84,0.08);
+  border-radius: 8px;
+  margin-top: 8px;
+}
