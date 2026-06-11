@@ -53,7 +53,7 @@ export async function getUserPlaylists(limit = 50): Promise<SpotifyPlaylist[]> {
 
 export async function getPlaylistTracks(playlistId: string): Promise<SpotifyTrackItem[]> {
   const all: SpotifyTrackItem[] = [];
-  let url = `/playlists/${playlistId}/tracks?limit=100&fields=items(track(id,name,duration_ms,preview_url,album(name,images),artists(id,name))),next`;
+  let url = `/playlists/${playlistId}/tracks?limit=100`;
 
   while (url) {
     const data = await spotifyFetch<{ items: SpotifyTrackItem[]; next: string | null }>(url.replace(BASE_URL, ''));
