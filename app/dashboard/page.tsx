@@ -33,6 +33,7 @@ export default function DashboardPage() {
 
   const [loadingPlaylists, setLoadingPlaylists] = useState(true);
   const [loadingTracks, setLoadingTracks] = useState(false);
+  const [trackError, setTrackError] = useState<string | null>(null);
   const [activeGenres, setActiveGenres] = useState<Set<string>>(new Set());
   const [activeMood, setActiveMood] = useState<MoodPreset | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,7 +104,7 @@ export default function DashboardPage() {
     setSelectedPlaylist(playlist);
     setEnrichedTracks([]); setSelectedTrackIds(new Set());
     setActiveGenres(new Set()); setActiveMood(null); setSearchQuery('');
-    setLoadingTracks(true); setSidebarOpen(false);
+    setLoadingTracks(true); setSidebarOpen(false); setTrackError(null);
 
     try {
       const items: SpotifyTrackItem[] = await getPlaylistTracks(playlist.id);
@@ -132,7 +133,11 @@ export default function DashboardPage() {
       }
 
       setEnrichedTracks(enrichTracks(tracks, featuresMap, artistsMap));
-    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed to load tracks', 'error'); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to load tracks';
+      setTrackError(msg);
+      showToast(msg, 'error');
+    }
     finally { setLoadingTracks(false); }
   }, []);
 
@@ -390,6 +395,16 @@ export default function DashboardPage() {
             </div>
             <div className={styles.loadingText}>Analyzing your music...</div>
             <div className={styles.loadingSubtext}>Fetching audio features, genres & moods</div>
+          </div>
+        ) : trackError ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>⚠️</div>
+            <h2>Couldn't load tracks</h2>
+            <p style={{ maxWidth: 400 }}>{trackError.includes('403') ? 'Spotify denied access. Try signing out and back in to refresh permissions.' : trackError}</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button className="btn btn-primary" onClick={() => selectedPlaylist && selectPlaylist(selectedPlaylist)}>Retry</button>
+              <button className="btn btn-secondary" onClick={logout}>Sign out & Re-login</button>
+            </div>
           </div>
         ) : enrichedTracks.length === 0 ? (
           <div className={styles.emptyState}>
