@@ -146,7 +146,7 @@ export async function createPlaylist(
 export async function addTracksToPlaylist(playlistId: string, trackUris: string[]): Promise<void> {
   const chunks = chunkArray(trackUris, 100);
   for (const chunk of chunks) {
-    await spotifyFetch(`/playlists/${playlistId}/tracks`, {
+    await spotifyFetch(`/playlists/${playlistId}/items`, {
       method: 'POST',
       body: JSON.stringify({ uris: chunk }),
     });
@@ -156,10 +156,43 @@ export async function addTracksToPlaylist(playlistId: string, trackUris: string[
 export async function removeTracksFromPlaylist(playlistId: string, trackUris: string[]): Promise<void> {
   const chunks = chunkArray(trackUris, 100);
   for (const chunk of chunks) {
-    await spotifyFetch(`/playlists/${playlistId}/tracks`, {
+    await spotifyFetch(`/playlists/${playlistId}/items`, {
       method: 'DELETE',
       body: JSON.stringify({ tracks: chunk.map((uri) => ({ uri })) }),
     });
+  }
+}
+
+// ─── Search & Recommendations ──────────────────────────────────────────────
+export async function searchTracks(query: string, limit = 30): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+    `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&market=from_token`
+  );
+  return data.tracks.items.filter(Boolean);
+}
+
+export async function getRecommendations(
+  seedTracks: string[] = [],
+  seedArtists: string[] = [],
+  seedGenres: string[] = [],
+  features: Record<string, number> = {},
+  limit = 30
+): Promise<SpotifyTrack[]> {
+  const params = new URLSearchParams();
+  params.set('limit', String(limit));
+  if (seedTracks.length) params.set('seed_tracks', seedTracks.slice(0, 2).join(','));
+  if (seedArtists.length) params.set('seed_artists', seedArtists.slice(0, 2).join(','));
+  if (seedGenres.length) params.set('seed_genres', seedGenres.slice(0, 1).join(','));
+  // Total seeds must be <= 5
+  for (const [key, val] of Object.entries(features)) {
+    params.set(key, String(val));
+  }
+  try {
+    const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(`/recommendations?${params.toString()}`);
+    return data.tracks?.filter(Boolean) ?? [];
+  } catch {
+    console.warn('Recommendations API unavailable');
+    return [];
   }
 }
 

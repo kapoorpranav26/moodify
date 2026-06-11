@@ -5,6 +5,7 @@ import { getAccessToken, clearTokens } from '@/lib/auth';
 import {
   getCurrentUser, getUserPlaylists, getPlaylistTracks,
   getAudioFeatures, getArtists, createPlaylist, addTracksToPlaylist,
+  removeTracksFromPlaylist,
   SpotifyUser, SpotifyPlaylist, SpotifyTrackItem, AudioFeatures, SpotifyArtist
 } from '@/lib/spotify';
 import { enrichTracks, groupByGenre, EnrichedTrack, GENRE_MAP, GenreInfo, formatDuration, getMoodLabel } from '@/lib/genres';
@@ -14,6 +15,7 @@ import { useTheme } from '@/lib/ThemeProvider';
 import GenreChart from '@/components/GenreChart';
 import MergeModal from '@/components/MergeModal';
 import DuplicateFinder from '@/components/DuplicateFinder';
+import AIPlaylistChat from '@/components/AIPlaylistChat';
 import styles from './dashboard.module.css';
 
 type Toast = { id: number; message: string; type: 'success' | 'error' | 'info' };
@@ -242,6 +244,64 @@ export default function DashboardPage() {
   };
 
   const logout = () => { clearTokens(); router.replace('/'); };
+
+  // ─── Track Removal ────────────────────────────────────────────────────────
+  const removeTrack = async (trackId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!selectedPlaylist) return;
+    const track = enrichedTracks.find((t) => t.track.id === trackId);
+    if (!track) return;
+
+    // Optimistic removal
+    const prevTracks = [...enrichedTracks];
+    setEnrichedTracks((prev) => prev.filter((t) => t.track.id !== trackId));
+    setSelectedTrackIds((prev) => { const n = new Set(prev); n.delete(trackId); return n; });
+
+    const uri = track.track.uri || `spotify:track:${trackId}`;
+    try {
+      await removeTracksFromPlaylist(selectedPlaylist.id, [uri]);
+      // Show undo toast
+      const toastId = Date.now();
+      setToasts((p) => [...p, { id: toastId, message: `🗑️ Removed "${track.track.name}" · Click to undo`, type: 'info' as const }]);
+      const undoTimeout = setTimeout(() => {
+        setToasts((p) => p.filter((t) => t.id !== toastId));
+      }, 6000);
+      // Store undo data
+      const handleUndo = async () => {
+        clearTimeout(undoTimeout);
+        setToasts((p) => p.filter((t) => t.id !== toastId));
+        try {
+          await addTracksToPlaylist(selectedPlaylist.id, [uri]);
+          setEnrichedTracks(prevTracks);
+          showToast(`↩️ "${track.track.name}" restored`, 'success');
+        } catch { showToast('Failed to undo', 'error'); }
+      };
+      // Replace the toast click handler by using a custom event
+      (window as any).__moodifyUndo = handleUndo;
+    } catch {
+      // Revert on failure
+      setEnrichedTracks(prevTracks);
+      showToast('Failed to remove track', 'error');
+    }
+  };
+
+  const removeSelected = async () => {
+    if (!selectedPlaylist || selectedTrackIds.size === 0) return;
+    const toRemove = enrichedTracks.filter((t) => selectedTrackIds.has(t.track.id));
+    const uris = toRemove.map((t) => t.track.uri || `spotify:track:${t.track.id}`);
+    const prevTracks = [...enrichedTracks];
+
+    setEnrichedTracks((prev) => prev.filter((t) => !selectedTrackIds.has(t.track.id)));
+    setSelectedTrackIds(new Set());
+
+    try {
+      await removeTracksFromPlaylist(selectedPlaylist.id, uris);
+      showToast(`🗑️ Removed ${toRemove.length} tracks`, 'success');
+    } catch {
+      setEnrichedTracks(prevTracks);
+      showToast('Failed to remove tracks', 'error');
+    }
+  };
 
   // ─── Genre stats ──────────────────────────────────────────────────────────
   const genreStats = (() => {
@@ -508,6 +568,11 @@ export default function DashboardPage() {
                     {hasActiveFilter && filteredTracks.length > 0 && (
                       <button className="btn btn-primary btn-sm" onClick={openOrganize}>+ Save {filteredTracks.length} tracks</button>
                     )}
+                    {selectedTrackIds.size > 0 && (
+                      <button className="btn btn-sm" style={{ background: '#ef4444', color: 'white' }} onClick={removeSelected}>
+                        🗑️ Remove {selectedTrackIds.size}
+                      </button>
+                    )}
                     <button className="btn btn-ghost btn-sm" onClick={selectAll}>
                       {selectedTrackIds.size === filteredTracks.length && filteredTracks.length > 0 ? 'Deselect all' : 'Select all'}
                     </button>
@@ -599,6 +664,16 @@ export default function DashboardPage() {
                           <div>{formatDuration(track.duration_ms)}</div>
                           {features && <div className={styles.moodLabel}>{getMoodLabel(features)}</div>}
                         </div>
+
+                        <button
+                          className={styles.trackDeleteBtn}
+                          onClick={(e) => removeTrack(track.id, e)}
+                          title="Remove from playlist"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                          </svg>
+                        </button>
                       </div>
                     );
                   })
@@ -656,8 +731,30 @@ export default function DashboardPage() {
 
       {/* ── Toasts ── */}
       <div className="toast-container">
-        {toasts.map((t) => <div key={t.id} className={`toast toast-${t.type}`}>{t.message}</div>)}
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className={`toast toast-${t.type}`}
+            onClick={() => {
+              if (t.message.includes('undo') && (window as any).__moodifyUndo) {
+                (window as any).__moodifyUndo();
+              }
+            }}
+            style={t.message.includes('undo') ? { cursor: 'pointer' } : undefined}
+          >
+            {t.message}
+          </div>
+        ))}
       </div>
+
+      {/* ── AI Playlist Chat ── */}
+      {user && (
+        <AIPlaylistChat
+          user={user}
+          onPlaylistCreated={(msg) => { showToast(msg, 'success'); fetchPlaylists(); }}
+          onError={(msg) => showToast(msg, 'error')}
+        />
+      )}
 
       {sidebarOpen && <div className={styles.mobileOverlay} onClick={() => setSidebarOpen(false)} />}
     </div>
