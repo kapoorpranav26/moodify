@@ -325,7 +325,11 @@ export default function DashboardPage() {
       <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
-            <div className={styles.logoMark}>M</div>
+            <div className={styles.logoMark}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="currentColor"/>
+              </svg>
+            </div>
             <span>Moodify</span>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
