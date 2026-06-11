@@ -165,10 +165,15 @@ export async function removeTracksFromPlaylist(playlistId: string, trackUris: st
 
 // ─── Search & Recommendations ──────────────────────────────────────────────
 export async function searchTracks(query: string, limit = 30): Promise<SpotifyTrack[]> {
-  const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-    `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&market=from_token`
-  );
-  return data.tracks.items.filter(Boolean);
+  try {
+    const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+      `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`
+    );
+    return data.tracks?.items?.filter(Boolean) ?? [];
+  } catch (e) {
+    console.error('[Moodify] Search failed for:', query, e);
+    return [];
+  }
 }
 
 export async function getRecommendations(

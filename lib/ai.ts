@@ -123,15 +123,37 @@ function fallbackParse(prompt: string): PlaylistIntent {
     'lofi': { moods: ['chill', 'atmospheric'], features: { energy: 0.3, danceability: 0.4, instrumentalness: 0.6 } },
     'energy': { moods: ['energetic', 'pumped'], features: { energy: 0.9, danceability: 0.7 } },
     'intense': { moods: ['intense', 'aggressive'], features: { energy: 0.95, valence: 0.4 } },
+    'hype': { moods: ['hype', 'lit'], features: { energy: 0.9, danceability: 0.8, valence: 0.8 } },
+    'vibe': { moods: ['atmospheric', 'smooth'], features: { energy: 0.5, valence: 0.6 } },
+    'rap': { moods: ['confident', 'bold'], features: { energy: 0.7, danceability: 0.7 } },
+    'pop': { moods: ['upbeat', 'catchy'], features: { energy: 0.6, danceability: 0.7, valence: 0.7 } },
+    'rock': { moods: ['intense', 'raw'], features: { energy: 0.8, valence: 0.5 } },
+    'r&b': { moods: ['smooth', 'soulful'], features: { energy: 0.5, danceability: 0.6, valence: 0.5 } },
+    'rnb': { moods: ['smooth', 'soulful'], features: { energy: 0.5, danceability: 0.6, valence: 0.5 } },
+    'bollywood': { moods: ['dramatic', 'melodic'], features: { energy: 0.6, valence: 0.6 } },
+    'punjabi': { moods: ['energetic', 'fun'], features: { energy: 0.8, danceability: 0.8 } },
+    'edm': { moods: ['energetic', 'euphoric'], features: { energy: 0.9, danceability: 0.9 } },
+    'classical': { moods: ['serene', 'elegant'], features: { energy: 0.2, acousticness: 0.9, instrumentalness: 0.9 } },
+    'jazz': { moods: ['smooth', 'sophisticated'], features: { energy: 0.4, acousticness: 0.7 } },
+    'acoustic': { moods: ['intimate', 'warm'], features: { energy: 0.3, acousticness: 0.8 } },
+    'indie': { moods: ['dreamy', 'alternative'], features: { energy: 0.5, valence: 0.5 } },
+    'metal': { moods: ['aggressive', 'intense'], features: { energy: 0.95, valence: 0.3 } },
+    'country': { moods: ['nostalgic', 'storytelling'], features: { energy: 0.5, acousticness: 0.5 } },
+    'latin': { moods: ['passionate', 'rhythmic'], features: { energy: 0.7, danceability: 0.8 } },
+    'reggaeton': { moods: ['fun', 'rhythmic'], features: { energy: 0.8, danceability: 0.9 } },
   };
 
   const detectedMoods: string[] = [];
   let features: PlaylistIntent['targetFeatures'] = {};
+  const detectedGenres: string[] = [];
   
   for (const [keyword, data] of Object.entries(moodMap)) {
     if (lower.includes(keyword)) {
       detectedMoods.push(...data.moods);
       features = { ...features, ...data.features };
+      if (['pop', 'rock', 'rap', 'r&b', 'rnb', 'edm', 'jazz', 'classical', 'metal', 'country', 'latin', 'reggaeton', 'indie', 'bollywood', 'punjabi', 'lofi', 'acoustic'].includes(keyword)) {
+        detectedGenres.push(keyword);
+      }
     }
   }
 
@@ -139,18 +161,63 @@ function fallbackParse(prompt: string): PlaylistIntent {
   const countMatch = lower.match(/(\d+)\s*(songs?|tracks?)/i);
   const count = countMatch ? Math.min(parseInt(countMatch[1]), 50) : 25;
 
-  // Build search queries from the prompt
-  const words = prompt.replace(/[^a-zA-Z0-9\s]/g, '').trim();
-  const searchQueries = [
-    words,
-    `${words} playlist`,
-    detectedMoods.length ? `${detectedMoods[0]} ${words}` : words,
-  ];
+  // Intelligently extract potential artist names and build targeted search queries
+  const stopWords = new Set(['make', 'me', 'a', 'an', 'the', 'with', 'for', 'my', 'of', 'to', 'and', 'or', 'like', 'songs', 'song', 'tracks', 'track', 'playlist', 'mix', 'music', 'give', 'create', 'build', 'some', 'best', 'top', 'hits', 'new', 'good', 'great', 'vibes', 'type', 'beat', 'beats', ...Object.keys(moodMap)]);
+  
+  // Extract meaningful words (potential artist names, descriptors)
+  const cleaned = prompt.replace(/[^a-zA-Z0-9\s&']/g, '').trim();
+  const words = cleaned.split(/\s+/).filter(w => !stopWords.has(w.toLowerCase()) && w.length > 1);
+  
+  // Build smart search queries
+  const searchQueries: string[] = [];
+  
+  // If we have meaningful words left (likely artist names), search for each
+  if (words.length > 0) {
+    // Try the meaningful words as artist search
+    searchQueries.push(`${words.join(' ')}`);
+    // Split by "and"/"&" to handle multiple artists
+    const artistParts = cleaned.split(/\s+(?:and|&)\s+/i)
+      .map(p => p.replace(/[^a-zA-Z0-9\s']/g, '').trim())
+      .map(p => p.split(/\s+/).filter(w => !stopWords.has(w.toLowerCase()) && w.length > 1).join(' '))
+      .filter(p => p.length > 0);
+    
+    for (const artist of artistParts) {
+      if (artist.length > 1) {
+        searchQueries.push(`artist:${artist}`);
+        if (detectedGenres.length > 0) {
+          searchQueries.push(`artist:${artist} genre:${detectedGenres[0]}`);
+        }
+      }
+    }
+  }
+  
+  // Add genre-based queries
+  if (detectedGenres.length > 0) {
+    searchQueries.push(`${detectedGenres.join(' ')} ${detectedMoods[0] || 'hits'}`);
+  }
+  
+  // Add mood-based queries
+  if (detectedMoods.length > 0 && searchQueries.length < 4) {
+    searchQueries.push(`${detectedMoods[0]} ${detectedMoods[1] || ''} music`.trim());
+  }
+  
+  // Fallback: just use the raw prompt
+  if (searchQueries.length === 0) {
+    searchQueries.push(prompt, `${prompt} songs`, `${prompt} playlist`);
+  }
+
+  // Deduplicate and limit to 5
+  const uniqueQueries = [...new Set(searchQueries)].slice(0, 5);
+
+  // Generate a creative name
+  const name = words.length > 0 && words.length <= 4
+    ? words.join(' & ') + (detectedMoods.length > 0 ? ` ${detectedMoods[0]}` : ' Mix')
+    : prompt.length > 30 ? prompt.slice(0, 30) + '...' : prompt;
 
   return {
-    name: prompt.length > 30 ? prompt.slice(0, 30) + '...' : prompt,
-    searchQueries,
-    genres: [],
+    name,
+    searchQueries: uniqueQueries,
+    genres: detectedGenres,
     moods: [...new Set(detectedMoods)],
     targetFeatures: features,
     count,

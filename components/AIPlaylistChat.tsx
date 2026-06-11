@@ -91,8 +91,8 @@ export default function AIPlaylistChat({ user, onPlaylistCreated, onError }: AIP
               allTracks.push(track);
             }
           }
-        } catch {
-          // Search query failed, continue with next
+        } catch (searchErr) {
+          console.error('[Moodify AI] Search failed for query:', query, searchErr);
         }
       }
 
