@@ -50,6 +50,10 @@ export async function generatePKCE(): Promise<{ verifier: string; challenge: str
 
 // Build Spotify auth URL
 export async function getAuthUrl(): Promise<string> {
+  // Clear any stale PKCE state from previous attempts
+  localStorage.removeItem('pkce_verifier');
+  localStorage.removeItem('auth_state');
+
   const { verifier, challenge } = await generatePKCE();
   const state = generateRandomString(16);
 
@@ -72,7 +76,11 @@ export async function getAuthUrl(): Promise<string> {
 // Exchange code for tokens
 export async function exchangeCode(code: string): Promise<TokenResponse> {
   const verifier = localStorage.getItem('pkce_verifier');
-  if (!verifier) throw new Error('No PKCE verifier found');
+  if (!verifier) throw new Error('No PKCE verifier found. Please try logging in again.');
+
+  // Remove verifier immediately after reading — prevent reuse
+  localStorage.removeItem('pkce_verifier');
+  localStorage.removeItem('auth_state');
 
   const response = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
@@ -87,8 +95,8 @@ export async function exchangeCode(code: string): Promise<TokenResponse> {
   });
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error_description || 'Token exchange failed');
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error_description || `Token exchange failed: ${response.status}`);
   }
 
   const tokens: TokenResponse = await response.json();
