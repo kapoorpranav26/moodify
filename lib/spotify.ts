@@ -14,18 +14,29 @@ async function getValidToken(): Promise<string> {
 
 async function spotifyFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = await getValidToken();
+  const method = options?.method?.toUpperCase() || 'GET';
+  
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+  // Only set Content-Type for requests with a body
+  if (method !== 'GET' && method !== 'HEAD') {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      ...headers,
       ...options?.headers,
     },
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error: ${res.status}`);
+    const msg = err?.error?.message || `API error: ${res.status}`;
+    console.error(`[Moodify] ${method} ${endpoint} → ${res.status}: ${msg}`);
+    throw new Error(msg);
   }
 
   if (res.status === 204) return {} as T;
@@ -53,7 +64,7 @@ export async function getUserPlaylists(limit = 50): Promise<SpotifyPlaylist[]> {
 
 export async function getPlaylistTracks(playlistId: string): Promise<SpotifyTrackItem[]> {
   const all: SpotifyTrackItem[] = [];
-  let url = `/playlists/${playlistId}/tracks?limit=100`;
+  let url = `/playlists/${playlistId}/tracks?limit=50&market=from_token`;
 
   while (url) {
     const data = await spotifyFetch<{ items: SpotifyTrackItem[]; next: string | null }>(url.replace(BASE_URL, ''));
