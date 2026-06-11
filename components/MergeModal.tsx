@@ -28,7 +28,7 @@ export default function MergeModal({ playlists, user, onClose, onSuccess, onErro
 
   const totalTracks = playlists
     .filter((p) => selected.has(p.id))
-    .reduce((sum, p) => sum + p.tracks.total, 0);
+    .reduce((sum, p) => sum + (p.tracks?.total ?? 0), 0);
 
   const handleMerge = async () => {
     if (selected.size < 2 || !name.trim()) return;
@@ -80,7 +80,7 @@ export default function MergeModal({ playlists, user, onClose, onSuccess, onErro
                 {selected.has(pl.id) && <div className={styles.checkOverlay}>✓</div>}
               </div>
               <div className={styles.plName}>{pl.name}</div>
-              <div className={styles.plCount}>{pl.tracks.total} tracks</div>
+              <div className={styles.plCount}>{pl.tracks?.total ?? 0} tracks</div>
             </button>
           ))}
         </div>

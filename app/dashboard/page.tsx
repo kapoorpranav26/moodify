@@ -306,7 +306,7 @@ export default function DashboardPage() {
                   </div>
                   <div className={styles.playlistMeta}>
                     <div className={styles.playlistName}>{pl.name}</div>
-                    <div className={styles.playlistCount}>{pl.tracks.total} tracks</div>
+                    <div className={styles.playlistCount}>{pl.tracks?.total ?? 0} tracks</div>
                   </div>
                 </button>
               ))}

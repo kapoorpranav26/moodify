@@ -44,7 +44,7 @@ export async function getUserPlaylists(limit = 50): Promise<SpotifyPlaylist[]> {
 
   while (url) {
     const data = await spotifyFetch<{ items: SpotifyPlaylist[]; next: string | null }>(url.replace(BASE_URL, ''));
-    all.push(...data.items.filter(Boolean));
+    all.push(...data.items.filter((p) => Boolean(p && p.id && p.name)));
     url = data.next ? data.next.replace(BASE_URL, '') : '';
   }
 
