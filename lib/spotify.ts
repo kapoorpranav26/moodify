@@ -64,7 +64,7 @@ export async function getUserPlaylists(limit = 50): Promise<SpotifyPlaylist[]> {
 
 export async function getPlaylistTracks(playlistId: string): Promise<SpotifyTrackItem[]> {
   const all: SpotifyTrackItem[] = [];
-  let url = `/playlists/${playlistId}/items?limit=50&market=from_token`;
+  let url = `/playlists/${playlistId}/items?limit=50`;
 
   while (url) {
     const data = await spotifyFetch<{ items: any[]; next: string | null }>(url.replace(BASE_URL, ''));
@@ -164,16 +164,34 @@ export async function removeTracksFromPlaylist(playlistId: string, trackUris: st
 }
 
 // ─── Search & Recommendations ──────────────────────────────────────────────
-export async function searchTracks(query: string, limit = 30): Promise<SpotifyTrack[]> {
-  try {
-    const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-      `/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`
-    );
-    return data.tracks?.items?.filter(Boolean) ?? [];
-  } catch (e) {
-    console.error('[Moodify] Search failed for:', query, e);
-    return [];
+export async function searchTracks(query: string, limit = 10): Promise<SpotifyTrack[]> {
+  // Spotify Feb 2026: max limit is 10, paginate with offset for more
+  const maxPerPage = 10;
+  const totalNeeded = Math.min(limit, 30);
+  const all: SpotifyTrack[] = [];
+
+  for (let offset = 0; all.length < totalNeeded; offset += maxPerPage) {
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        type: 'track',
+        limit: String(maxPerPage),
+        offset: String(offset),
+      });
+      const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[]; total: number } }>(
+        `/search?${params.toString()}`
+      );
+      const items = data.tracks?.items?.filter(Boolean) ?? [];
+      if (items.length === 0) break; // No more results
+      all.push(...items);
+      if (items.length < maxPerPage) break; // Last page
+    } catch (e) {
+      console.error('[Moodify] Search failed for:', query, 'offset:', offset, e);
+      break;
+    }
   }
+
+  return all.slice(0, totalNeeded);
 }
 
 export async function getRecommendations(
