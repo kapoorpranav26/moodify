@@ -64,8 +64,33 @@ export async function getUserPlaylists(limit = 50): Promise<SpotifyPlaylist[]> {
 
 export async function getPlaylistTracks(playlistId: string): Promise<SpotifyTrackItem[]> {
   const all: SpotifyTrackItem[] = [];
-  let url = `/playlists/${playlistId}/tracks?limit=50&market=from_token`;
 
+  // Strategy 1: Try the main playlist endpoint (works in Dev Mode)
+  try {
+    const playlist = await spotifyFetch<{
+      tracks: { items: SpotifyTrackItem[]; next: string | null; total: number };
+    }>(`/playlists/${playlistId}`);
+
+    if (playlist?.tracks?.items) {
+      all.push(...playlist.tracks.items.filter((i) => i?.track?.id));
+      
+      // Paginate if there are more tracks
+      let nextUrl = playlist.tracks.next;
+      while (nextUrl) {
+        const page = await spotifyFetch<{ items: SpotifyTrackItem[]; next: string | null }>(
+          nextUrl.replace(BASE_URL, '')
+        );
+        all.push(...page.items.filter((i) => i?.track?.id));
+        nextUrl = page.next;
+      }
+      return all;
+    }
+  } catch (e) {
+    console.warn('[Moodify] Main playlist endpoint failed, trying tracks endpoint...', e);
+  }
+
+  // Strategy 2: Fallback to tracks sub-endpoint
+  let url = `/playlists/${playlistId}/tracks?limit=50&market=from_token`;
   while (url) {
     const data = await spotifyFetch<{ items: SpotifyTrackItem[]; next: string | null }>(url.replace(BASE_URL, ''));
     all.push(...data.items.filter((i) => i?.track?.id));
