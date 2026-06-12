@@ -77,6 +77,7 @@ const ARTIST_GENRE_MAP: Record<string, string> = {
   'jid': 'Hip Hop', 'denzel curry': 'Hip Hop', 'ski mask': 'Hip Hop', 'joey bada$$': 'Hip Hop',
   'central cee': 'Hip Hop', 'dave': 'Hip Hop', 'stormzy': 'Hip Hop',
   'seedhe maut': 'Hip Hop', 'raftaar': 'Hip Hop', 'divine': 'Hip Hop', 'emiway bantai': 'Hip Hop',
+  '$undown': 'Hip Hop', 'otismadeit': 'Hip Hop', 'feng': 'Hip Hop', 'yeat': 'Hip Hop', 'ken carson': 'Hip Hop',
   'krsna': 'Hip Hop', 'karma': 'Hip Hop', 'kr$na': 'Hip Hop', 'ikka': 'Hip Hop', 'badshah': 'Hip Hop',
   'yo yo honey singh': 'Hip Hop', 'brodha v': 'Hip Hop', 'king': 'Hip Hop',
 
@@ -86,7 +87,8 @@ const ARTIST_GENRE_MAP: Record<string, string> = {
   'shubh': 'Punjabi', 'parmish verma': 'Punjabi', 'hardy sandhu': 'Punjabi', 'b praak': 'Punjabi',
   'jaani': 'Punjabi', 'jass manak': 'Punjabi', 'guru randhawa': 'Punjabi', 'ammy virk': 'Punjabi',
   'jassie gill': 'Punjabi', 'nimrat khaira': 'Punjabi', 'jasmine sandlas': 'Punjabi', 'kaka': 'Punjabi',
-  'harrdy sandhu': 'Punjabi', 'gur sidhu': 'Punjabi',
+  'harrdy sandhu': 'Punjabi', 'gur sidhu': 'Punjabi', 'real boss': 'Punjabi', 'baggh-e smg': 'Punjabi',
+  'jind universe': 'Punjabi', 'wazir patar': 'Punjabi', 'prem dhillon': 'Punjabi', 'tarsem jassar': 'Punjabi',
 
   // Bollywood
   'arijit singh': 'Bollywood', 'shreya ghoshal': 'Bollywood', 'neha kakkar': 'Bollywood',
@@ -105,6 +107,7 @@ const ARTIST_GENRE_MAP: Record<string, string> = {
   'halsey': 'Pop', 'lizzo': 'Pop', 'katy perry': 'Pop', 'bts': 'Pop',
   'blackpink': 'Pop', 'twice': 'Pop', 'lisa': 'Pop', 'rosé': 'Pop',
   'sabrina carpenter': 'Pop', 'chappell roan': 'Pop', 'tate mcrae': 'Pop',
+  'charli xcx': 'Pop', 'nelly furtado': 'Pop',
   'lana del rey': 'Indie Pop', 'clairo': 'Indie Pop', 'phoebe bridgers': 'Indie Pop',
   'conan gray': 'Indie Pop', 'girl in red': 'Indie Pop', 'rex orange county': 'Indie Pop',
 
@@ -161,13 +164,7 @@ const ARTIST_GENRE_MAP: Record<string, string> = {
   'lofi girl': 'Lo-Fi', 'nujabes': 'Lo-Fi', 'jinsang': 'Lo-Fi',
   'idealism': 'Lo-Fi', 'kupla': 'Lo-Fi', 'tomppabeats': 'Lo-Fi',
 
-  // Bollywood / Indian
-  'arijit singh': 'Pop', 'atif aslam': 'Pop', 'neha kakkar': 'Pop',
-  'armaan malik': 'Pop', 'jubin nautiyal': 'Pop', 'shreya ghoshal': 'Pop',
-  'a.r. rahman': 'Pop', 'pritam': 'Pop', 'vishal-shekhar': 'Pop',
-  'amit trivedi': 'Pop', 'sachin-jigar': 'Pop', 'tanishk bagchi': 'Pop',
-  'diljit dosanjh': 'Pop', 'guru randhawa': 'Pop', 'ap dhillon': 'Hip Hop',
-  'sidhu moose wala': 'Hip Hop', 'karan aujla': 'Hip Hop', 'shubh': 'Hip Hop',
+  // Removed obsolete Bollywood / Indian section that was overriding the new mappings
 };
 
 function detectGenreFromNames(track: SpotifyTrack): GenreInfo {
