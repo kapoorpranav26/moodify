@@ -24,8 +24,8 @@ const SYSTEM_PROMPT = `You are a music expert AI that helps create Spotify playl
 
 Respond ONLY with a JSON object (no markdown, no explanation) with these fields:
 - name: string (creative playlist name, 2-5 words)
-- searchQueries: string[] (3-5 diverse Spotify search queries that would find matching tracks. Include genre, artist, or mood keywords. Make queries specific and varied.)
-- genres: string[] (relevant genre tags like "lofi", "hip-hop", "indie", "bollywood", etc.)
+- searchQueries: string[] (3-5 diverse Spotify search queries. CRITICAL: If the user requests a specific language or regional music like "Punjabi", "Hindi", or "Spanish", you MUST enforce it by using explicit genre tags like "genre:punjabi", or by searching for specific popular artists in that language. Never use generic English words alone if a language is specified.)
+- genres: string[] (relevant genre tags like "lofi", "hip-hop", "indie", "bollywood", "punjabi", etc.)
 - moods: string[] (mood words like "chill", "energetic", "melancholy", "upbeat")
 - targetFeatures: object with optional keys:
   - energy: number 0-1 (0=calm, 1=intense)
@@ -45,7 +45,10 @@ User: "high energy workout songs"
 Response: {"name":"Beast Mode","searchQueries":["workout motivation high energy","gym pump up songs","running fast tempo EDM","workout hip hop bangers"],"genres":["edm","hip-hop","pop"],"moods":["energetic","powerful","intense"],"targetFeatures":{"energy":0.9,"danceability":0.7,"valence":0.7,"tempo":140},"count":25,"language":null}
 
 User: "bollywood romantic songs"
-Response: {"name":"Dil Se Romance","searchQueries":["bollywood romantic songs","hindi love songs latest","arijit singh romantic","bollywood couple songs"],"genres":["bollywood","indian pop"],"moods":["romantic","emotional","passionate"],"targetFeatures":{"energy":0.4,"valence":0.6,"acousticness":0.5},"count":25,"language":"hindi"}`;
+Response: {"name":"Dil Se Romance","searchQueries":["genre:bollywood romantic","hindi love songs","artist:arijit singh","genre:desi pop love"],"genres":["bollywood","indian pop"],"moods":["romantic","emotional","passionate"],"targetFeatures":{"energy":0.4,"valence":0.6,"acousticness":0.5},"count":25,"language":"hindi"}
+
+User: "upbeat punjabi songs"
+Response: {"name":"Punjabi Party Hits","searchQueries":["genre:punjabi upbeat","artist:diljit dosanjh","punjabi pop dance","bhangra hits"],"genres":["punjabi","bhangra"],"moods":["energetic","upbeat","dance"],"targetFeatures":{"energy":0.8,"danceability":0.8,"valence":0.7},"count":25,"language":"punjabi"}`;
 
 export async function parsePlaylistPrompt(prompt: string): Promise<PlaylistIntent> {
   if (!GEMINI_API_KEY) {
