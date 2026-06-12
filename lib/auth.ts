@@ -68,6 +68,7 @@ export async function getAuthUrl(): Promise<string> {
     code_challenge: challenge,
     state,
     scope: SCOPES,
+    show_dialog: 'true',
   });
 
   return `https://accounts.spotify.com/authorize?${params.toString()}`;

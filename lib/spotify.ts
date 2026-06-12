@@ -2,6 +2,10 @@ import { getAccessToken, isTokenExpired, refreshAccessToken } from './auth';
 
 const BASE_URL = 'https://api.spotify.com/v1';
 
+// Circuit breakers for endpoints restricted in new API changes
+let isAudioFeaturesBlocked = false;
+let isArtistsBlocked = false;
+
 async function getValidToken(): Promise<string> {
   if (isTokenExpired()) {
     const refreshed = await refreshAccessToken();
@@ -87,10 +91,12 @@ export async function getPlaylistTracks(playlistId: string): Promise<SpotifyTrac
 
 // ─── Audio Features ────────────────────────────────────────────────────────
 export async function getAudioFeatures(trackIds: string[]): Promise<AudioFeatures[]> {
+  if (isAudioFeaturesBlocked || trackIds.length === 0) return [];
   const results: AudioFeatures[] = [];
   const chunks = chunkArray(trackIds, 100);
 
   for (const chunk of chunks) {
+    if (isAudioFeaturesBlocked) break;
     try {
       const data = await spotifyFetch<{ audio_features: AudioFeatures[] }>(
         `/audio-features?ids=${chunk.join(',')}`
@@ -99,8 +105,8 @@ export async function getAudioFeatures(trackIds: string[]): Promise<AudioFeature
         results.push(...data.audio_features.filter(Boolean));
       }
     } catch {
-      // Audio features endpoint may be restricted — continue without them
-      console.warn('Audio features unavailable — genre detection will use artist data only');
+      // Audio features endpoint may be restricted — stop trying
+      isAudioFeaturesBlocked = true;
     }
   }
 
@@ -109,12 +115,14 @@ export async function getAudioFeatures(trackIds: string[]): Promise<AudioFeature
 
 // ─── Artists ───────────────────────────────────────────────────────────────
 export async function getArtists(artistIds: string[]): Promise<SpotifyArtist[]> {
+  if (isArtistsBlocked) return [];
   const results: SpotifyArtist[] = [];
   const unique = [...new Set(artistIds)].filter(Boolean);
   if (unique.length === 0) return results;
   const chunks = chunkArray(unique, 50);
 
   for (const chunk of chunks) {
+    if (isArtistsBlocked) break;
     try {
       const data = await spotifyFetch<{ artists: SpotifyArtist[] }>(
         `/artists?ids=${chunk.join(',')}`
@@ -123,8 +131,8 @@ export async function getArtists(artistIds: string[]): Promise<SpotifyArtist[]> 
         results.push(...data.artists.filter(Boolean));
       }
     } catch {
-      // Artists endpoint may fail — continue without genre data
-      console.warn('Artists endpoint unavailable — some genre data may be missing');
+      // Artists endpoint may fail — stop trying
+      isArtistsBlocked = true;
     }
   }
 
