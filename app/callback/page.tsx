@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { exchangeCode } from '@/lib/auth';
 import { Suspense } from 'react';
@@ -9,14 +9,15 @@ function CallbackHandler() {
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('Connecting to Spotify...');
+  const exchangeAttempted = React.useRef(false);
 
   useEffect(() => {
     const code = searchParams.get('code');
-    const error = searchParams.get('error');
+    const errorMsg = searchParams.get('error');
     const state = searchParams.get('state');
 
-    if (error) {
-      setError(`Spotify denied access: ${error}`);
+    if (errorMsg) {
+      setError(`Spotify denied access: ${errorMsg}`);
       return;
     }
 
@@ -25,7 +26,10 @@ function CallbackHandler() {
       return;
     }
 
-    const savedState = sessionStorage.getItem('auth_state');
+    if (exchangeAttempted.current) return;
+    exchangeAttempted.current = true;
+
+    const savedState = localStorage.getItem('auth_state');
     if (state && savedState && state !== savedState) {
       setError('Security check failed. Please try again.');
       return;
