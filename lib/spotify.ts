@@ -170,7 +170,7 @@ export async function addTracksToPlaylist(playlistId: string, trackUris: string[
 export async function removeTracksFromPlaylist(playlistId: string, trackUris: string[]): Promise<void> {
   const chunks = chunkArray(trackUris, 100);
   for (const chunk of chunks) {
-    await spotifyFetch(`/playlists/${playlistId}/items`, {
+    await spotifyFetch(`/playlists/${playlistId}/tracks`, {
       method: 'DELETE',
       body: JSON.stringify({ tracks: chunk.map((uri) => ({ uri })) }),
     });
