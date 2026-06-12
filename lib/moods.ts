@@ -17,8 +17,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Low energy, moody, atmospheric',
     color: '#6366f1',
     playlistDesc: 'Your late-night, atmospheric vibes — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.energy < 0.45 && features.valence < 0.5 && features.acousticness > 0.2,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.energy < 0.45 && features.valence < 0.5 && features.acousticness > 0.2;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['r&b', 'lo-fi', 'jazz', 'night', 'sleep', 'late', 'moon'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Workout 💪',
@@ -26,8 +29,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'High energy, fast tempo, pumped',
     color: '#ef4444',
     playlistDesc: 'Your ultimate workout fuel — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.energy > 0.75 && features.tempo > 120 && features.danceability > 0.55,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.energy > 0.75 && features.tempo > 120 && features.danceability > 0.55;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['workout', 'gym', 'pump', 'hip hop', 'metal', 'electronic', 'edm', 'drill', 'hype'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Chill ☕',
@@ -35,8 +41,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Relaxed, balanced, easygoing',
     color: '#86efac',
     playlistDesc: 'Your perfect chill-out session — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.energy < 0.55 && features.valence > 0.4 && features.acousticness > 0.25,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.energy < 0.55 && features.valence > 0.4 && features.acousticness > 0.25;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['chill', 'relax', 'lo-fi', 'acoustic', 'folk', 'breeze', 'vibe'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Happy ✨',
@@ -44,8 +53,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Uplifting, positive, feel-good',
     color: '#fde68a',
     playlistDesc: 'Pure good vibes — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.valence > 0.7 && features.energy > 0.5,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.valence > 0.7 && features.energy > 0.5;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['happy', 'pop', 'joy', 'sun', 'good', 'smile', 'bollywood', 'latin'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Focus 🎯',
@@ -53,8 +65,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Instrumental, steady, minimal vocals',
     color: '#38bdf8',
     playlistDesc: 'Deep focus mode — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.instrumentalness > 0.3 && features.speechiness < 0.1 && features.energy < 0.65,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.instrumentalness > 0.3 && features.speechiness < 0.1 && features.energy < 0.65;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['focus', 'study', 'classical', 'jazz', 'lo-fi', 'instrumental', 'piano'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Dance Party 🕺',
@@ -62,8 +77,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'High danceability, upbeat, groovy',
     color: '#f472b6',
     playlistDesc: 'Dance floor-ready bangers — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.danceability > 0.75 && features.energy > 0.6,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.danceability > 0.75 && features.energy > 0.6;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['dance', 'party', 'club', 'electronic', 'edm', 'reggaeton', 'latin', 'pop'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Sad Hours 😢',
@@ -71,8 +89,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Melancholic, low valence, introspective',
     color: '#a78bfa',
     playlistDesc: 'For when the feels hit — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.valence < 0.3 && features.energy < 0.5,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.valence < 0.3 && features.energy < 0.5;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['sad', 'cry', 'tears', 'broken', 'heart', 'miss', 'lonely', 'acoustic', 'indie'].some(k => combined.includes(k));
+    },
   },
   {
     name: 'Road Trip 🚗',
@@ -80,8 +101,11 @@ export const MOOD_PRESETS: MoodPreset[] = [
     description: 'Mid-energy, fun, singalong-worthy',
     color: '#f97316',
     playlistDesc: 'Windows down, music up — organized by Moodify',
-    filter: ({ features }) =>
-      !!features && features.energy > 0.55 && features.valence > 0.55 && features.danceability > 0.55,
+    filter: ({ features, genre, track }) => {
+      if (features) return features.energy > 0.55 && features.valence > 0.55 && features.danceability > 0.55;
+      const combined = `${track.name} ${genre.name}`.toLowerCase();
+      return ['road', 'drive', 'trip', 'highway', 'summer', 'pop', 'rock', 'country', 'indie'].some(k => combined.includes(k));
+    },
   },
 ];
 

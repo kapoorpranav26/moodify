@@ -113,26 +113,10 @@ export default function DashboardPage() {
       const tracks = items.map((i) => i.track).filter(Boolean);
       if (!tracks.length) { setLoadingTracks(false); return; }
 
-      // Fetch audio features and artists independently — neither is required
+      // Spotify deprecated these endpoints for Dev apps in late 2024, causing 403 Forbidden errors.
+      // We skip them entirely to prevent console flooding and rely on our smart fallback detection.
       let featuresMap = new Map<string, AudioFeatures>();
       let artistsMap = new Map<string, SpotifyArtist>();
-
-      try {
-        const featuresArr = await getAudioFeatures(tracks.map((t) => t.id));
-        featuresMap = new Map(featuresArr.map((f) => [f.id, f]));
-      } catch {
-        console.warn('Audio features unavailable');
-      }
-
-      try {
-        const artistIds = [...new Set(tracks.flatMap((t) => t.artists.map((a) => a.id)).filter(Boolean))];
-        if (artistIds.length > 0) {
-          const artistsArr = await getArtists(artistIds);
-          artistsMap = new Map(artistsArr.map((a) => [a.id, a]));
-        }
-      } catch {
-        console.warn('Artist data unavailable');
-      }
 
       setEnrichedTracks(enrichTracks(tracks, featuresMap, artistsMap));
     } catch (e) {
@@ -202,7 +186,10 @@ export default function DashboardPage() {
       }
       count > 0 ? showToast(`✅ Created ${count} genre playlists!`, 'success') : showToast('Not enough tracks per genre.', 'info');
       await fetchPlaylists();
-    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed', 'error'); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed';
+      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+    }
     finally { setOrganizing(false); }
   };
 
@@ -216,7 +203,10 @@ export default function DashboardPage() {
       await addTracksToPlaylist(pl.id, matching.map((t) => `spotify:track:${t.track.id}`));
       showToast(`✅ "${mood.name}" created with ${matching.length} tracks!`, 'success');
       await fetchPlaylists();
-    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed', 'error'); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed';
+      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+    }
     finally { setOrganizing(false); }
   };
 
@@ -232,7 +222,10 @@ export default function DashboardPage() {
       showToast(`✅ "${newPlaylistName}" created!`, 'success');
       setShowOrganizeModal(false); setNewPlaylistName('');
       await fetchPlaylists();
-    } catch (e) { showToast(e instanceof Error ? e.message : 'Failed', 'error'); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed';
+      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+    }
     finally { setOrganizing(false); }
   };
 
@@ -429,9 +422,6 @@ export default function DashboardPage() {
           </div>
 
           <div className={styles.topbarActions}>
-            <button className={styles.themeBtn} onClick={toggleTheme} id="theme-toggle-top" title="Toggle theme">
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
             {selectedPlaylist && !loadingTracks && enrichedTracks.length > 0 && (
               <>
                 <button className="btn btn-secondary btn-sm" onClick={() => setShowDupFinder(true)}>🔍 Duplicates</button>
