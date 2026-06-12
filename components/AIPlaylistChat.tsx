@@ -80,54 +80,11 @@ export default function AIPlaylistChat({ user, onPlaylistCreated, onError }: AIP
       const allTracks: SpotifyTrack[] = [];
       const seenIds = new Set<string>();
 
-      // To get the absolute best playlist, we use Spotify's Recommendation algorithm.
-      // 1. We use the first query to find 1-2 "seed" tracks.
-      let seedTracks: string[] = [];
-      try {
-        if (intent.searchQueries.length > 0) {
-          const seeds = await searchTracks(intent.searchQueries[0], 2);
-          seedTracks = seeds.map(t => t.id);
-          allTracks.push(...seeds);
-          seeds.forEach(t => seenIds.add(t.id));
-        }
-      } catch (err) {
-        console.warn('Failed to fetch seed tracks', err);
-      }
-
-      // 2. We use the seed tracks + AI target features to generate the rest of the playlist!
-      if (seedTracks.length > 0) {
-        try {
-          const formattedFeatures: Record<string, number> = {};
-          if (intent.targetFeatures) {
-            Object.entries(intent.targetFeatures).forEach(([k, v]) => {
-              formattedFeatures[`target_${k}`] = v;
-            });
-          }
-          
-          const recs = await getRecommendations(
-            seedTracks,
-            [],
-            [],
-            formattedFeatures,
-            intent.count - allTracks.length
-          );
-          
-          for (const track of recs) {
-            if (!seenIds.has(track.id) && allTracks.length < intent.count) {
-              seenIds.add(track.id);
-              allTracks.push(track);
-            }
-          }
-        } catch (err) {
-          console.warn('Recommendations failed, falling back to pure search', err);
-        }
-      }
-
-      // 3. Fallback: If we still need tracks, use the remaining search queries
-      for (const query of intent.searchQueries.slice(1)) {
+      // Search Spotify using the AI-generated smart queries
+      for (const query of intent.searchQueries) {
         if (allTracks.length >= intent.count) break;
         try {
-          const results = await searchTracks(query, 10);
+          const results = await searchTracks(query, 15);
           for (const track of results) {
             if (!seenIds.has(track.id) && allTracks.length < intent.count) {
               seenIds.add(track.id);
