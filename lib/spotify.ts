@@ -144,9 +144,16 @@ export async function createPlaylist(
   name: string,
   description: string
 ): Promise<SpotifyPlaylist> {
+  // Use /me/playlists instead of /users/{id}/playlists to bypass Development Mode 403 bugs
   return spotifyFetch<SpotifyPlaylist>(`/users/${userId}/playlists`, {
     method: 'POST',
     body: JSON.stringify({ name, description }),
+  }).catch(() => {
+    // Fallback to undocumented /me/playlists if the above fails
+    return spotifyFetch<SpotifyPlaylist>(`/me/playlists`, {
+      method: 'POST',
+      body: JSON.stringify({ name, description }),
+    });
   });
 }
 
