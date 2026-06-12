@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎵 Moodify
 
-## Getting Started
+Moodify is a powerful, AI-driven Spotify companion app that automatically organizes your chaotic music library and generates hyper-personalized playlists based on your exact mood.
 
-First, run the development server:
+Built with Next.js, the Spotify Web API, and Google's cutting-edge Gemini 2.5 Flash model.
 
+## ✨ Features
+
+- **🪄 Auto-Organize:** Instantly analyzes your saved tracks and automatically sorts them into distinct, beautifully categorized playlists based on Genre and Mood (e.g., "Upbeat Pop", "Chill Lofi", "Energetic Rap").
+- **🧠 AI Playlist Generator:** Tell Moodify exactly how you feel (e.g., *"I feel lethargic and need concentration, give me upbeat Punjabi songs"*). The Gemini 2.5 AI mathematically translates your mood into audio targets (energy, valence, danceability) and feeds them into Spotify's core recommendation engine to generate the perfect, vibe-matched playlist.
+- **📱 Fully Responsive:** A premium, glassmorphism-inspired UI with smooth micro-animations that looks stunning across Desktop, Tablet, and Mobile devices.
+- **🔒 Secure PKCE Authentication:** Logs you in securely using Spotify's modern OAuth 2.0 PKCE flow, ensuring your data and playlists stay private.
+
+## 🛠 Tech Stack
+
+- **Framework:** Next.js 15 (App Router) & React 19
+- **Styling:** Vanilla CSS Modules (No Tailwind, fully custom design system)
+- **APIs:** Spotify Web API & Google Gemini API (gemini-2.5-flash)
+
+## 🚀 Getting Started
+
+### Prerequisites
+1. Create a [Spotify Developer App](https://developer.spotify.com/dashboard) to get a Client ID.
+2. Create a [Google AI Studio](https://aistudio.google.com/app/apikey) account to get a free Gemini API Key (starts with `AIzaSy`).
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/kapoorpranav26/moodify.git
+cd moodify
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file in the root directory and add your keys:
+```env
+# Spotify OAuth Configuration
+NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000/callback
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Google Gemini API for AI Playlists
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-## Learn More
+4. Run the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚢 Deploying to Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+When deploying to Vercel, make sure to add your Environment Variables in the Vercel Dashboard Settings, and update the `NEXT_PUBLIC_REDIRECT_URI` to match your actual Vercel domain (e.g., `https://your-app.vercel.app/callback`). Also, ensure you add this new callback URL to the "Redirect URIs" list in your Spotify Developer Dashboard.
