@@ -621,9 +621,19 @@
   .menuBtn { display: flex; }
   .mobileOverlay { display: block; }
   .statsPanel { display: none; }
-  .topbarActions { gap: 6px; }
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .topbarActions { gap: 6px; width: 100%; justify-content: flex-end; }
   .trackGenre { display: none; }
   .trackDuration { display: none; }
-  .trackControls { padding: 12px 16px; }
+  .trackControls { padding: 12px 16px; flex-direction: column; align-items: stretch; gap: 12px; }
+  .trackMeta { flex-direction: column; align-items: flex-start; gap: 8px; }
   .trackList { padding: 8px; }
+}
+
+@media (max-width: 480px) {
+  .topbarPlaylistName { font-size: 14px; }
+  .trackCover { width: 32px; height: 32px; }
+  .trackName { font-size: 13px; }
+  .trackArtist { font-size: 11px; }
+  .topbarActions .btn { padding: 6px 10px; font-size: 12px; }
 }
