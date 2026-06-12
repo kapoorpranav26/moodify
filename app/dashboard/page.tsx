@@ -188,7 +188,7 @@ export default function DashboardPage() {
       await fetchPlaylists();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed';
-      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+      showToast(msg.includes('403') ? `Spotify Error: ${msg}. Try signing out and signing back in to refresh your permissions.` : `Spotify Error: ${msg}`, 'error');
     }
     finally { setOrganizing(false); }
   };
@@ -205,7 +205,7 @@ export default function DashboardPage() {
       await fetchPlaylists();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed';
-      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+      showToast(msg.includes('403') ? `Spotify Error: ${msg}. Try signing out and signing back in to refresh your permissions.` : `Spotify Error: ${msg}`, 'error');
     }
     finally { setOrganizing(false); }
   };
@@ -224,7 +224,7 @@ export default function DashboardPage() {
       await fetchPlaylists();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed';
-      showToast(msg.includes('403') || msg.includes('Forbidden') ? 'Spotify blocked creation. Ensure your Spotify Developer App has your email added under User Management, and that you accepted the permissions prompt.' : msg, 'error');
+      showToast(msg.includes('403') ? `Spotify Error: ${msg}. Try signing out and signing back in to refresh your permissions.` : `Spotify Error: ${msg}`, 'error');
     }
     finally { setOrganizing(false); }
   };
