@@ -434,15 +434,6 @@ export default function DashboardPage() {
           <div className={styles.topbarActions}>
             {selectedPlaylist && !loadingTracks && enrichedTracks.length > 0 && (
               <>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowDupFinder(true)}
-                  disabled={selectedPlaylist.owner.id !== user?.id}
-                  title={selectedPlaylist.owner.id !== user?.id ? "You can only remove duplicates from playlists you created. Try duplicating this playlist first!" : "Find and remove duplicate tracks"}
-                  style={selectedPlaylist.owner.id !== user?.id ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
-                >
-                  🔍 Duplicates
-                </button>
                 <button className="btn btn-secondary btn-sm" onClick={autoOrganize} disabled={organizing}>
                   {organizing ? '...' : '🪄 Auto-Organize'}
                 </button>
