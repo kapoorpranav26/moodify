@@ -20,6 +20,8 @@ export const GENRE_MAP: GenreInfo[] = [
   { name: 'Latin', color: '#fde68a', emoji: '💃', keywords: ['latin', 'reggaeton', 'salsa', 'cumbia', 'bachata', 'merengue', 'latin pop', 'afrobeats'] },
   { name: 'Metal', color: '#94a3b8', emoji: '🤘', keywords: ['metal', 'heavy metal', 'death metal', 'black metal', 'metalcore', 'thrash metal', 'doom metal'] },
   { name: 'Folk / Country', color: '#d97706', emoji: '🪕', keywords: ['folk', 'country', 'americana', 'bluegrass', 'singer-songwriter', 'acoustic', 'indie folk'] },
+  { name: 'Punjabi', color: '#fb923c', emoji: '🪘', keywords: ['punjabi', 'punjabi pop', 'punjabi hip hop', 'bhangra', 'desi hip hop'] },
+  { name: 'Bollywood', color: '#ec4899', emoji: '🎬', keywords: ['bollywood', 'filmi', 'desi pop', 'indian pop'] },
 ];
 
 export const UNKNOWN_GENRE: GenreInfo = {
@@ -76,7 +78,22 @@ const ARTIST_GENRE_MAP: Record<string, string> = {
   'central cee': 'Hip Hop', 'dave': 'Hip Hop', 'stormzy': 'Hip Hop',
   'seedhe maut': 'Hip Hop', 'raftaar': 'Hip Hop', 'divine': 'Hip Hop', 'emiway bantai': 'Hip Hop',
   'krsna': 'Hip Hop', 'karma': 'Hip Hop', 'kr$na': 'Hip Hop', 'ikka': 'Hip Hop', 'badshah': 'Hip Hop',
-  'yo yo honey singh': 'Hip Hop', 'brodha v': 'Hip Hop',
+  'yo yo honey singh': 'Hip Hop', 'brodha v': 'Hip Hop', 'king': 'Hip Hop',
+
+  // Punjabi
+  'karan aujla': 'Punjabi', 'ap dhillon': 'Punjabi', 'gurinder gill': 'Punjabi', 'shinda kahlon': 'Punjabi',
+  'sidhu moose wala': 'Punjabi', 'diljit dosanjh': 'Punjabi', 'amrinder gill': 'Punjabi',
+  'shubh': 'Punjabi', 'parmish verma': 'Punjabi', 'hardy sandhu': 'Punjabi', 'b praak': 'Punjabi',
+  'jaani': 'Punjabi', 'jass manak': 'Punjabi', 'guru randhawa': 'Punjabi', 'ammy virk': 'Punjabi',
+  'jassie gill': 'Punjabi', 'nimrat khaira': 'Punjabi', 'jasmine sandlas': 'Punjabi', 'kaka': 'Punjabi',
+  'harrdy sandhu': 'Punjabi', 'gur sidhu': 'Punjabi',
+
+  // Bollywood
+  'arijit singh': 'Bollywood', 'shreya ghoshal': 'Bollywood', 'neha kakkar': 'Bollywood',
+  'sonu nigam': 'Bollywood', 'atif aslam': 'Bollywood', 'jubin nautiyal': 'Bollywood',
+  'vishal-shekhar': 'Bollywood', 'pritam': 'Bollywood', 'a.r. rahman': 'Bollywood',
+  'k.k.': 'Bollywood', 'kk': 'Bollywood', 'amit trivedi': 'Bollywood', 'sunidhi chauhan': 'Bollywood',
+  'darshan raval': 'Bollywood', 'armaan malik': 'Bollywood', 'tulsi kumar': 'Bollywood',
 
   // Pop
   'taylor swift': 'Pop', 'ariana grande': 'Pop', 'billie eilish': 'Pop', 'harry styles': 'Pop',
