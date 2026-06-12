@@ -139,7 +139,6 @@ export async function getArtists(artistIds: string[]): Promise<SpotifyArtist[]> 
   return results;
 }
 
-// ─── Create Playlist ───────────────────────────────────────────────────────
 export async function createPlaylist(
   userId: string,
   name: string,
@@ -147,7 +146,7 @@ export async function createPlaylist(
 ): Promise<SpotifyPlaylist> {
   return spotifyFetch<SpotifyPlaylist>(`/users/${userId}/playlists`, {
     method: 'POST',
-    body: JSON.stringify({ name, description, public: false }),
+    body: JSON.stringify({ name, description }),
   });
 }
 
