@@ -51,6 +51,16 @@ export default function DashboardPage() {
   const [dragTrack, setDragTrack] = useState<EnrichedTrack | null>(null);
   const [playlistSearch, setPlaylistSearch] = useState('');
 
+  // ─── Force Re-Auth for New Scopes ───
+  useEffect(() => {
+    const version = localStorage.getItem('moodify_auth_version');
+    if (version !== 'v2') {
+      clearTokens();
+      localStorage.setItem('moodify_auth_version', 'v2');
+      router.replace('/');
+    }
+  }, [router]);
+
   // ─── Auth ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const token = getAccessToken();
